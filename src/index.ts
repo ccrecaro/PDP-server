@@ -20,20 +20,25 @@ app.get('/', (req: Request, res: Response) => {
     const defaultSerializer = new JsonSerializer();
 
     const reqJSON = parseRequestToJSON("bs@simpsons.com");
+    const reqFile:RequestCtx = loadRequest("/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testRequestRole.json");
 
     const requestFromJSON: RequestCtx = defaultSerializer.deserialize(reqJSON, RequestCtx) as RequestCtx; //cast para anular nulls            
     console.log("===== Objeto 3======");
-    var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicy.json"]);
+    var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyRole.json"]);
     var pdp:PDP = new PDP(policyFinder);
     pdp.policyFinder.loadPolicies();
     
-    var resCtx = pdp.evaluateContext(requestFromJSON);
+    var resCtx = pdp.evaluateContext(reqFile);
     console.log(JSON.stringify(resCtx));
 });
 
 app.post('/api/login', (req, res) => {
   
   checkAccess(req, res);
+});
+
+app.post('/api/permission', (req, res) => {
+  checkAccessWithRequestCtx(req, res);
 });
 
 
@@ -51,12 +56,28 @@ function checkAccess(req: Request, res: Response){
 
   const requestFromJSON: RequestCtx = defaultSerializer.deserialize(reqJSON, RequestCtx) as RequestCtx; //cast para anular nulls            
   console.log("===== Objeto 3======");
-  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicy.json"]);
+  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyRole.json"]);
   var pdp:PDP = new PDP(policyFinder);
   pdp.policyFinder.loadPolicies();
   
   var resCtx = pdp.evaluateContext(requestFromJSON);
   console.log(JSON.stringify(resCtx));
+
+  return resCtx.result[0].decision === "Permit" ? res.json({ message: "Access granted" }) : res.status(403).json({ message: "Access denied" });
+}
+
+function checkAccessWithRequestCtx(req: Request, res: Response){
+  const { requestCtxJSON } = req.body;
+  const defaultSerializer = new JsonSerializer();
+
+  const requestFromJSON: RequestCtx = defaultSerializer.deserialize(requestCtxJSON, RequestCtx) as RequestCtx; //cast para anular nulls 
+
+  console.log("===== Objeto 3======");
+  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyRole.json"]);
+  var pdp:PDP = new PDP(policyFinder);
+  pdp.policyFinder.loadPolicies();
+  
+  var resCtx = pdp.evaluateContext(requestFromJSON);
 
   return resCtx.result[0].decision === "Permit" ? res.json({ message: "Access granted" }) : res.status(403).json({ message: "Access denied" });
 }
