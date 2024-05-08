@@ -17,14 +17,10 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
-    const defaultSerializer = new JsonSerializer();
+    const reqFile:RequestCtx = loadRequest("/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testDenyRequest.json");
 
-    const reqJSON = parseRequestToJSON("bs@simpsons.com");
-    const reqFile:RequestCtx = loadRequest("/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testRequestRole.json");
-
-    const requestFromJSON: RequestCtx = defaultSerializer.deserialize(reqJSON, RequestCtx) as RequestCtx; //cast para anular nulls            
-    console.log("===== Objeto 3======");
-    var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyRole.json"]);
+    console.log("===== Test load request ======");
+    var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testDenyPolicy.json"]);
     var pdp:PDP = new PDP(policyFinder);
     pdp.policyFinder.loadPolicies();
     
@@ -55,8 +51,8 @@ function checkAccess(req: Request, res: Response){
   const reqJSON = parseRequestToJSON(username);
 
   const requestFromJSON: RequestCtx = defaultSerializer.deserialize(reqJSON, RequestCtx) as RequestCtx; //cast para anular nulls            
-  console.log("===== Objeto 3======");
-  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyRole.json"]);
+  console.log("===== checkAccess ======");
+  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicy4.json", "/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyDoctor.json"]);
   var pdp:PDP = new PDP(policyFinder);
   pdp.policyFinder.loadPolicies();
   
@@ -72,8 +68,8 @@ function checkAccessWithRequestCtx(req: Request, res: Response){
 
   const requestFromJSON: RequestCtx = defaultSerializer.deserialize(requestCtxJSON, RequestCtx) as RequestCtx; //cast para anular nulls 
 
-  console.log("===== Objeto 3======");
-  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyRole.json"]);
+  console.log("===== checkAccessWithRequestCtx ======");
+  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicy4.json", "/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyDoctor.json"]);
   var pdp:PDP = new PDP(policyFinder);
   pdp.policyFinder.loadPolicies();
   
