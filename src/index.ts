@@ -17,10 +17,10 @@ app.use(cors());
 app.use(express.json());
 
 app.get('/', (req: Request, res: Response) => {
-    const reqFile:RequestCtx = loadRequest("/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testDenyRequest.json");
+    const reqFile:RequestCtx = loadRequest("/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testRequestPatient.json");
 
     console.log("===== Test load request ======");
-    var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testDenyPolicy.json"]);
+    var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyPatient.json"]);
     var pdp:PDP = new PDP(policyFinder);
     pdp.policyFinder.loadPolicies();
     
@@ -33,10 +33,13 @@ app.post('/api/login', (req, res) => {
   checkAccess(req, res);
 });
 
-app.post('/api/permission', (req, res) => {
-  checkAccessWithRequestCtx(req, res);
+app.post('/api/permission/doctor', (req, res) => {
+  checkAccessWithRequestCtx(req, res, 'doctor');
 });
 
+app.post('/api/permission/patient', (req, res) => {
+  checkAccessWithRequestCtx(req, res, 'patient');
+});
 
 app.listen(3001, () => {
   console.log('Server is running on port 3001');
@@ -52,7 +55,7 @@ function checkAccess(req: Request, res: Response){
 
   const requestFromJSON: RequestCtx = defaultSerializer.deserialize(reqJSON, RequestCtx) as RequestCtx; //cast para anular nulls            
   console.log("===== checkAccess ======");
-  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicy4.json", "/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyDoctor.json"]);
+  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyPatient.json"]);
   var pdp:PDP = new PDP(policyFinder);
   pdp.policyFinder.loadPolicies();
   
@@ -62,14 +65,15 @@ function checkAccess(req: Request, res: Response){
   return resCtx.result[0].decision === "Permit" ? res.json({ message: "Access granted" }) : res.status(403).json({ message: "Access denied" });
 }
 
-function checkAccessWithRequestCtx(req: Request, res: Response){
+function checkAccessWithRequestCtx(req: Request, res: Response, role: string){
   const { requestCtxJSON } = req.body;
   const defaultSerializer = new JsonSerializer();
 
   const requestFromJSON: RequestCtx = defaultSerializer.deserialize(requestCtxJSON, RequestCtx) as RequestCtx; //cast para anular nulls 
-
-  console.log("===== checkAccessWithRequestCtx ======");
-  var policyFinder: PolicyFinder = new PolicyFinder(["/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicy4.json", "/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyDoctor.json"]);
+  const policyRole: string = role == 'doctor' ? "/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyDoctor.json" : "/Users/carolinacontreras/Desktop/TFM/PAP/policies/json/testPolicyPatient.json";
+  console.log(policyRole);
+  console.log("===== checkAccessWithRequestCtx ======"); 
+  var policyFinder: PolicyFinder = new PolicyFinder([policyRole]);
   var pdp:PDP = new PDP(policyFinder);
   pdp.policyFinder.loadPolicies();
   
